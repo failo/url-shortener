@@ -1,0 +1,24 @@
+version: '2.0'
+
+services:
+  shortener:
+    image: openjdk:10-jre-slim
+    volumes:
+      - ./target/shortener-0.0.1-SNAPSHOT.jar:/usr/shortener.jar
+      - ./docker/web/wait-for-cass.sh:/usr/wait-for-cass.sh
+    command: "sh /usr/wait-for-cass.sh"
+    depends_on:
+      - cassandra
+    ports:
+      - "8080:9000"
+  cassandra:
+    build: ./docker/cassandra
+    ports:
+      - "9042:9042"
+    volumes:
+      - cassandra-data:/var/lib/cassandra
+      - cassandra-data:/home/cassandra/.cassandra
+    command: "sh /init-schema.sh"
+
+volumes:
+  cassandra-data:
